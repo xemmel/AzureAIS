@@ -2,7 +2,7 @@
 
 ## Table Of Content
 - [A simple boilerplate Azure Function](#a-simple-boilerplate-azure-function)
-- [function.json](#function.json)
+- [function.json](#function json)
 
 
 ## A simple boilerplate Azure Function
@@ -28,7 +28,7 @@ public static async Task<HttpResponseMessage> Run(HttpRequestMessage req, TraceW
 [Back to top](#table-of-content)
 
 
-### function.json
+### function json
 
 this is a basic set up with an httpTrigger in that returns a response
 
