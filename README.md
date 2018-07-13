@@ -2,7 +2,7 @@
 
 ## Table Of Content
 - [A simple boilerplate Azure Function](#a-simple-boilerplate-azure-function)
-- [function.json](#function json)
+- [function.json](#function-json)
 
 
 ## A simple boilerplate Azure Function
