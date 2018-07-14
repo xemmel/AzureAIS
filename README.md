@@ -216,18 +216,11 @@ When receiving from an artifact such as a **Service Bus Queue** the queue connec
 
 ```csharp
 
+using System;
+
+public static void Run(string myQueueItem, TraceWriter log)
 {
-  "bindings": [
-    {
-      "name": "myQueueItem",
-      "type": "serviceBusTrigger",
-      "direction": "in",
-      "queueName": "orders",
-      "connection": "workingitsblistener",
-      "accessRights": "Listen"
-    }
-  ],
-  "disabled": false
+    log.Info($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
 }
 
 
