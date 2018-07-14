@@ -3,7 +3,9 @@
 ## Table Of Content
 - [A simple boilerplate Azure Function](#a-simple-boilerplate-azure-function)
 - [function.json](#function-json)
+- [Send to Queue](#send-to-queue)
 - [Timer function](#timer-function)
+- [Receiving from Queue](#receiving-from-queue)
 
 
 ## A simple boilerplate Azure Function
@@ -148,6 +150,87 @@ public static void Run(TimerInfo myTimer, TraceWriter log)
 
 Lets join the things we have learned
 
+```json
 
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 */1 * * * *"
+    },
+    {
+      "type": "serviceBus",
+      "connection": "workingitsbsender",
+      "name": "outputSbMsg",
+      "queueName": "orders",
+      "accessRights": "Send",
+      "direction": "out"
+    }
+  ],
+  "disabled": false
+}
+
+```
+
+```csharp
+
+using System;
+
+public static void Run(TimerInfo myTimer, TraceWriter log, ICollector<string> outputSbMsg)
+{
+    log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
+    outputSbMsg.Add(DateTime.Now.ToString());
+}
+
+
+```
+
+> Note that the timer is not *async* so ICollector is used.
+
+
+[Back to top](#table-of-content)
+
+## Receiving from Queue
+
+When receiving from an artifact such as a **Service Bus Queue** the queue connection needs to be set up as *input* instead of *output*
+
+```json
+
+{
+  "bindings": [
+    {
+      "name": "myQueueItem",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "orders",
+      "connection": "workingitsblistener",
+      "accessRights": "Listen"
+    }
+  ],
+  "disabled": false
+}
+
+```
+
+```csharp
+
+{
+  "bindings": [
+    {
+      "name": "myQueueItem",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "orders",
+      "connection": "workingitsblistener",
+      "accessRights": "Listen"
+    }
+  ],
+  "disabled": false
+}
+
+
+```
 
 [Back to top](#table-of-content)
