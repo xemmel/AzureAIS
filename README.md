@@ -7,7 +7,7 @@
 - [Timer function](#timer-function)
 - [Receiving from Queue](#receiving-from-queue)
 - [Write to Storage Queue](#write-to-storage-queue)
-
+- [Write to Storage Table](#write-to-storage-table)
 
 ## A simple boilerplate Azure Function
 
@@ -307,3 +307,143 @@ IAsyncCollector<Order> outputQueueItem)
 ```
 
 [Back to top](#table-of-content)
+
+
+## Write to Storage Table
+
+```json
+
+  {
+      "type": "table",
+      "name": "outputQueueItem",
+      "tableName": "orders",
+      "connection": "witstorage",
+      "direction": "out"
+    }
+
+```
+
+```csharp
+
+#r "Microsoft.WindowsAzure.Storage"
+using System.Net; 
+using System.Text;
+using Microsoft.WindowsAzure.Storage.Table;
+
+public class Order : TableEntity {
+    public string CustomerId {get; set;}
+    public string Item {get; set;}
+    public int Qty {get; set;}
+    
+}
+
+public static async Task<HttpResponseMessage> Run(HttpRequestMessage req, 
+TraceWriter log,
+IAsyncCollector<Order> outputQueueItem)
+{
+    string body = await req.Content.ReadAsStringAsync();
+    string result = $"Hello there, you typed {body}";
+    
+    //Write to queue Storage
+    Order o = new Order() {CustomerId = "IBM", Item = "Matt", Qty = 17, PartitionKey = "Functions",
+        RowKey = Guid.NewGuid().ToString()};
+
+    await outputQueueItem.AddAsync(o);
+    var response = new HttpResponseMessage(HttpStatusCode.OK) {
+        Content = new StringContent(result, Encoding.UTF8, "text/plain")
+    };
+  
+    return response;
+ 
+}
+
+
+
+
+```
+
+#### Submit Object as JSON
+
+```csharp 
+
+#r "Microsoft.WindowsAzure.Storage"
+using System.Net; 
+using System.Text;
+using Microsoft.WindowsAzure.Storage.Table;
+
+public class Order : TableEntity {
+    public string CustomerId {get; set;}
+    public string Item {get; set;}
+    public int Qty {get; set;}
+    public string Desc {get; set;}
+    
+}
+
+public static async Task<HttpResponseMessage> Run(HttpRequestMessage req, 
+TraceWriter log,
+IAsyncCollector<Order> outputQueueItem)
+{
+    Order order = await req.Content.ReadAsAsync<Order>();
+    
+    //Write to queue Storage
+    order.PartitionKey = "Functions";
+    order.RowKey = Guid.NewGuid().ToString();
+  
+
+    await outputQueueItem.AddAsync(order);
+    var response = new HttpResponseMessage(HttpStatusCode.OK) {
+        Content = new StringContent($"Order submitted to table..:", Encoding.UTF8, "text/plain")
+    };
+  
+    return response;
+ 
+}
+
+
+```
+
+[Back to top](#table-of-content)
+
+
+
+```json
+
+{
+      "type": "blob",
+      "name": "outputQueueItem",
+      "connection": "witstorage",
+      "direction": "out",
+      "path": "orders/{rand-guid}"
+    }
+    
+
+```
+
+
+
+```csharp
+
+using System.Net; 
+using System.Text;
+
+
+
+public static HttpResponseMessage Run(HttpRequestMessage req, 
+TraceWriter log,
+out string outputQueueItem)
+{
+    
+    //Write to queue Storage
+    
+  
+
+    outputQueueItem = "Hello Blob";
+    var response = new HttpResponseMessage(HttpStatusCode.OK) {
+        Content = new StringContent($"Order submitted to table..:", Encoding.UTF8, "text/plain")
+    };
+  
+    return response;
+ 
+}
+
+```
