@@ -3,6 +3,7 @@
 ## Table Of Content
 - [A simple boilerplate Azure Function](#a-simple-boilerplate-azure-function)
 - [function.json](#function-json)
+- [Timer function](#timer-function)
 
 
 ## A simple boilerplate Azure Function
@@ -56,6 +57,8 @@ this is a basic set up with an httpTrigger in that returns a response
 }
 
 ```
+[Back to top](#table-of-content)
+
 ### Send To Queue
 
 When a connectionString to a *Service Bus* queue has been set up in the Function App Settings the following can be appended to the **function.json** configuration 
@@ -107,4 +110,44 @@ IAsyncCollector<string> outputSbMsg)
 > If the functions had not been an *async* function, *ICollector<T>* or simply *out T outputSbMsg* should have been used.
 > out **cannot** be used in an async function, therefore in our case we need to use *IAsyncCollector*
 
+[Back to top](#table-of-content)
 
+## Timer function
+
+The basic set up is as follows (using CRON)
+
+```json
+
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 */1 * * * *"
+    }
+  ],
+  "disabled": false
+}
+
+```
+
+```csharp
+
+using System;
+
+public static void Run(TimerInfo myTimer, TraceWriter log)
+{
+    log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
+}
+
+
+```
+
+### A timer example sending to a SB Queue
+
+Lets join the things we have learned
+
+
+
+[Back to top](#table-of-content)
