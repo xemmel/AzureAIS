@@ -6,6 +6,7 @@
 - [Send to Queue](#send-to-queue)
 - [Timer function](#timer-function)
 - [Receiving from Queue](#receiving-from-queue)
+- [Write to Storage Queue](#write-to-storage-queue)
 
 
 ## A simple boilerplate Azure Function
@@ -221,6 +222,85 @@ using System;
 public static void Run(string myQueueItem, TraceWriter log)
 {
     log.Info($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
+}
+
+
+```
+
+The example above just gets the content of the queue as a string.
+
+A more advanced approach would be to use the **BrokeredMessage** class instead
+
+```csharp
+
+#r"Microsoft.ServiceBus"
+using System;
+using System.IO;
+using Microsoft.ServiceBus.Messaging;
+
+public static void Run(BrokeredMessage myQueueItem, TraceWriter log)
+{
+    Stream stream = myQueueItem.GetBody<Stream>();
+    StreamReader reader = new StreamReader(stream);
+    string s = reader.ReadToEnd();
+    log.Info($"C# ServiceBus queue trigger function processed message: {s}. Property Count: {myQueueItem.Properties.Count}");
+
+    foreach(var p in myQueueItem.Properties) {
+        log.Info($"Property: {p.Key} Value: {p.Value}. Type: {p.Value.GetType().ToString()}");
+    }
+}
+
+```
+
+[Back to top](#table-of-content)
+
+
+## Write to Storage Queue
+
+
+```json
+
+{
+      "type": "queue",
+      "name": "outputQueueItem",
+      "queueName": "orders",
+      "connection": "witstorage",
+      "direction": "out"
+}
+
+```
+
+Now we can submit messages to the queue (orders)
+> Note Storage Queues DO support Async
+
+```csharp
+
+using System.Net; 
+using System.Text;
+
+public class Order {
+    public string CustomerId {get; set;}
+    public string Item {get; set;}
+    public int Qty {get; set;}
+    
+}
+
+public static async Task<HttpResponseMessage> Run(HttpRequestMessage req, 
+TraceWriter log,
+IAsyncCollector<Order> outputQueueItem)
+{
+    string body = await req.Content.ReadAsStringAsync();
+    string result = $"Hello there, you typed {body}";
+    
+    //Write to queue Storage
+    Order o = new Order() {CustomerId = "IBM", Item = "Matt", Qty = 17};
+    await outputQueueItem.AddAsync(o);
+    var response = new HttpResponseMessage(HttpStatusCode.OK) {
+        Content = new StringContent(result, Encoding.UTF8, "text/plain")
+    };
+  
+    return response;
+ 
 }
 
 
