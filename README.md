@@ -6,6 +6,7 @@
 - [Send to Queue](#send-to-queue)
 - [Timer function](#timer-function)
 - [Receiving from Queue](#receiving-from-queue)
+- [Receiving from Topic](#receiving-from-topic)
 - [Write to Storage Queue](#write-to-storage-queue)
 - [Write to Storage Table](#write-to-storage-table)
 
@@ -254,6 +255,31 @@ public static void Run(BrokeredMessage myQueueItem, TraceWriter log)
 
 [Back to top](#table-of-content)
 
+## Receiving from Topic
+
+Same as Queue just use this *function.json* instead
+
+```json
+
+{
+  "bindings": [
+    {
+      "name": "myQueueItem",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "topicName": "topic",
+      "subscriptionName": "us",
+      "connection": "workingitsblistener",
+      "accessRights": "Manage"
+    }
+  ],
+  "disabled": false
+}
+
+
+```
+
+[Back to top](#table-of-content)
 
 ## Write to Storage Queue
 
